@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐱 Team Neko - プレゼンテーション</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+  :root {
+    --pink:    #FF6B9D;
+    --yellow:  #FFD93D;
+    --cyan:    #4ECDC4;
+    --purple:  #A855F7;
+    --orange:  #FF8C42;
+    --green:   #6BCB77;
+    --bg-dark: #1a1a2e;
+    --bg-mid:  #16213e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg-dark);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* ======== SLIDE ENGINE ======== */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    opacity: 0;
+    transform: translateX(60px) scale(0.97);
+    transition: opacity 0.5s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.97);
+  }
+
+  /* ======== NAV ======== */
+  .nav {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 999;
+  }
+
+  .nav button {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 999px;
+    font-size: 18px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+  }
+  .nav button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+  .dots {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 999;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transition: background 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .dot.active { background: white; transform: scale(1.4); }
+
+  /* slide number */
+  .slide-num {
+    position: fixed; top: 20px; right: 30px;
+    color: rgba(255,255,255,0.4);
+    font-size: 13px; z-index: 999;
+  }
+
+  /* ======== UTILITIES ======== */
+  .tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 14px; font-weight: 700;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+  }
+
+  h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; line-height: 1.1; }
+  h2 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; }
+  h3 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 700; }
+  p  { font-size: clamp(0.9rem, 1.5vw, 1.1rem); line-height: 1.7; }
+
+  .text-white { color: white; }
+  .text-center { text-align: center; }
+
+  .glow {
+    text-shadow: 0 0 30px currentColor, 0 0 60px currentColor;
+  }
+
+  /* pop border deco */
+  .pop-border {
+    border: 4px solid;
+    border-radius: 24px;
+    padding: 6px 18px;
+  }
+
+  /* ======== CAT (from real app CSS) ======== */
+  .cat-container {
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; width: 140px; height: 155px; user-select: none;
+  }
+  .cat-container.size-lg { width: 200px; height: 220px; }
+  .cat-container.size-sm { width: 90px;  height: 100px; transform: scale(0.65); }
+
+  .cat-ears { display: flex; gap: 28px; position: relative; z-index: 2; margin-bottom: -8px; }
+  .cat-container.size-lg .cat-ears { gap: 40px; margin-bottom: -12px; }
+  .cat-container.size-sm .cat-ears { gap: 20px; }
+
+  .cat-ear {
+    width: 0; height: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-bottom: 21px solid;
+    position: relative;
+  }
+  .cat-container.size-lg .cat-ear { border-left-width:18px; border-right-width:18px; border-bottom-width:30px; }
+
+  .cat-ear-inner {
+    width: 0; height: 0;
+    border-left: 7px solid transparent; border-right: 7px solid transparent;
+    border-bottom: 13px solid #ffb6c1;
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  }
+  .cat-container.size-lg .cat-ear-inner { border-left-width:10px; border-right-width:10px; border-bottom-width:18px; top:12px; }
+
+  .cat-head {
+    width: 84px; height: 70px; border-radius: 50% 50% 45% 45%;
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .cat-container.size-lg .cat-head { width:120px; height:100px; }
+  .cat-container.size-sm .cat-head { width:60px; height:50px; }
+
+  .cat-eyes { display: flex; gap: 20px; margin-top: -4px; }
+  .cat-container.size-lg .cat-eyes { gap: 30px; }
+  .cat-container.size-sm .cat-eyes { gap: 14px; }
+
+  .cat-eye {
+    width: 13px; height: 13px; background: white; border-radius: 50%;
+    position: relative; overflow: hidden;
+  }
+  .cat-container.size-lg .cat-eye { width:18px; height:18px; }
+  .cat-container.size-sm .cat-eye { width:9px;  height:9px; }
+
+  .cat-pupil {
+    width: 7px; height: 7px; background: #222; border-radius: 50%;
+    position: absolute; top: 3px; left: 3px; transition: transform 0.2s;
+  }
+  .cat-container.size-lg .cat-pupil { width:10px; height:10px; top:4px; left:4px; }
+
+  .cat-nose { width: 6px; height: 5px; background: #ffb6c1; border-radius: 50%; margin-top: 3px; }
+  .cat-container.size-lg .cat-nose { width:8px; height:6px; margin-top:4px; }
+
+  .cat-mouth { display: flex; margin-top: 1px; }
+  .cat-mouth-line {
+    width: 7px; height: 6px;
+    border-bottom: 2px solid #333; border-radius: 0 0 50% 50%;
+  }
+  .cat-container.size-lg .cat-mouth-line { width:10px; height:8px; }
+
+  .cat-whiskers { display: flex; justify-content: space-between; width: 76px; margin-top: 2px; }
+  .cat-container.size-lg .cat-whiskers { width: 110px; }
+  .cat-whisker-group { display: flex; flex-direction: column; gap: 2px; }
+  .cat-whisker { width: 20px; height: 1px; background: #888; }
+  .cat-container.size-lg .cat-whisker { width: 28px; }
+
+  .cat-whisker-group:first-child .cat-whisker { transform-origin: right center; }
+  .cat-whisker-group:first-child .cat-whisker:first-child { transform: rotate(-10deg); }
+  .cat-whisker-group:first-child .cat-whisker:last-child  { transform: rotate(10deg); }
+  .cat-whisker-group:last-child  .cat-whisker { transform-origin: left center; }
+  .cat-whisker-group:last-child  .cat-whisker:first-child { transform: rotate(10deg); }
+  .cat-whisker-group:last-child  .cat-whisker:last-child  { transform: rotate(-10deg); }
+
+  .cat-body {
+    width: 70px; height: 50px; border-radius: 30% 30% 50% 50%;
+    margin-top: -7px; position: relative; z-index: 0;
+  }
+  .cat-container.size-lg .cat-body { width:100px; height:70px; margin-top:-10px; }
+
+  .cat-paws { display: flex; gap: 28px; margin-top: -6px; z-index: 1; }
+  .cat-container.size-lg .cat-paws { gap: 40px; }
+
+  .cat-paw { width: 17px; height: 11px; border-radius: 50%; transition: transform 0.1s; }
+  .cat-container.size-lg .cat-paw { width:24px; height:16px; }
+
+  .cat-tail {
+    width: 42px; height: 21px;
+    border: 3px solid transparent;
+    border-bottom-width: 3px;
+    border-radius: 0 0 50% 50%;
+    position: absolute; bottom: 21px; right: 10px;
+    transform: rotate(-20deg); transition: transform 0.3s;
+  }
+  .cat-container.size-lg .cat-tail { width:60px; height:30px; border-width:4px; bottom:30px; right:15px; }
+
+  .cat-zzz {
+    position: absolute; top: 2px; right: 12px;
+    font-size: 13px; font-weight: bold; color: #aaa;
+    opacity: 0; display: none;
+  }
+  .cat-container.size-lg .cat-zzz { font-size:18px; top:5px; right:20px; }
+
+  .cat-collar {
+    position: absolute; top: 72px; left: 50%; transform: translateX(-50%);
+    z-index: 4; display: flex; align-items: center; gap: 3px;
+    padding: 2px 9px 2px 5px; border-radius: 16px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+    font-size: 9px; font-weight: bold; color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    white-space: nowrap;
+  }
+  .cat-container.size-lg .cat-collar { top:103px; font-size:11px; }
+  .cat-collar-bell { font-size: 11px; }
+  .cat-container.size-sm .cat-collar { display: none; }
+
+  /* ---- state animations ---- */
+  .state-idle .cat-body   { animation: breathe 3s ease-in-out infinite; }
+  .state-idle .cat-tail   { animation: tailWag 4s ease-in-out infinite; }
+
+  .state-typing .cat-paw:first-child { animation: pawLeft  0.3s ease-in-out infinite; }
+  .state-typing .cat-paw:last-child  { animation: pawRight 0.3s ease-in-out infinite 0.15s; }
+  .state-typing .cat-pupil           { transform: translateY(3px); }
+
+  .state-clicking .cat-paw:last-child { animation: pawClick 0.4s ease-in-out infinite; }
+  .state-clicking .cat-pupil          { transform: translateX(3px); }
+
+  .state-scrolling .cat-pupil { animation: eyeScroll 0.8s ease-in-out infinite; }
+
+  .state-sleeping .cat-eye {
+    height: 3px; margin-top: 5px;
+    background: transparent; border-top: 2px solid #333; border-radius: 0; overflow: visible;
+  }
+  .cat-container.size-lg.state-sleeping .cat-eye { height:4px; margin-top:7px; border-top-width:3px; }
+  .state-sleeping .cat-pupil  { display: none; }
+  .state-sleeping .cat-body   { animation: breathe 4s ease-in-out infinite; }
+  .state-sleeping .cat-zzz    { display: block; animation: zzz 2s ease-in-out infinite; }
+
+  .speed-fast .cat-paw:first-child,
+  .speed-fast .cat-paw:last-child { animation-duration: 0.15s !important; }
+
+  @keyframes breathe  { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.04)} }
+  @keyframes tailWag  { 0%,100%{transform:rotate(-20deg)} 50%{transform:rotate(-35deg)} }
+  @keyframes pawLeft  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes pawRight { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes pawClick { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.1)} }
+  @keyframes eyeScroll{ 0%,100%{transform:translateY(-3px)} 50%{transform:translateY(3px)} }
+  @keyframes zzz {
+    0%  { opacity:0; transform:translate(0,0)    scale(0.8); }
+    50% { opacity:1; transform:translate(10px,-15px) scale(1); }
+    100%{ opacity:0; transform:translate(20px,-30px) scale(1.2); }
+  }
+
+  /* float animations for deco */
+  @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  @keyframes floatY2{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+  @keyframes spin    { to { transform: rotate(360deg); } }
+  @keyframes pulse   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  @keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:none} }
+
+  /* ======================================
+     SLIDE 1 — TITLE
+  ====================================== */
+  #s1 {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    overflow: hidden;
+  }
+  #s1 .bg-stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 15%, white, transparent),
+      radial-gradient(1px 1px   at 30% 80%, white, transparent),
+      radial-gradient(1.5px 1.5px at 60% 25%, white, transparent),
+      radial-gradient(1px 1px   at 80% 60%, white, transparent),
+      radial-gradient(2px 2px   at 50% 50%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px   at 90% 10%, white, transparent);
+  }
+  #s1 .title-wrap { position: relative; z-index: 1; text-align: center; }
+  #s1 .emoji-bg {
+    font-size: 160px; opacity: 0.06;
+    position: absolute; top: -60px; left: -60px;
+    animation: spin 20s linear infinite;
+  }
+  #s1 h1 {
+    background: linear-gradient(90deg, #FF6B9D, #FFD93D, #4ECDC4);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    margin-bottom: 8px;
+  }
+  #s1 .subtitle {
+    color: rgba(255,255,255,0.7);
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    margin-bottom: 32px;
+    letter-spacing: 2px;
+  }
+  #s1 .cats-row {
+    display: flex; gap: 20px; justify-content: center; align-items: flex-end;
+    margin-top: 10px;
+  }
+  #s1 .tag-bar {
+    display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap;
+  }
+  #s1 .hashtag {
+    color: rgba(255,255,255,0.5);
+    font-size: 14px; font-weight: 700; letter-spacing: 1px;
+  }
+
+  /* ======================================
+     SLIDE 2 — PROBLEM
+  ====================================== */
+  #s2 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+  #s2 .problem-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; max-width: 900px; width: 100%;
+    margin-top: 36px;
+  }
+  #s2 .prob-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 28px 20px;
+    text-align: center; position: relative;
+    transition: transform 0.3s;
+  }
+  #s2 .prob-card:hover { transform: translateY(-6px); }
+  #s2 .prob-icon { font-size: 40px; display: block; margin-bottom: 14px; }
+  #s2 .prob-card h3 { color: white; margin-bottom: 8px; font-size: 1.1rem; }
+  #s2 .prob-card p  { color: rgba(255,255,255,0.55); font-size: 0.88rem; }
+  #s2 h2 { color: white; }
+  #s2 .accent { color: var(--pink); }
+
+  /* ======================================
+     SLIDE 3 — SOLUTION
+  ====================================== */
+  #s3 {
+    background: linear-gradient(135deg, #0d0d0d 0%, #1a0533 50%, #0d1a33 100%);
+  }
+  #s3 .sol-layout {
+    display: flex; align-items: center; gap: 60px;
+    max-width: 1000px; width: 100%;
+  }
+  #s3 .sol-text { flex: 1; }
+  #s3 .sol-text h2 { color: white; margin-bottom: 20px; }
+  #s3 .sol-text .highlight {
+    background: linear-gradient(90deg, #FF6B9D, #FFD93D);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  #s3 .sol-text p { color: rgba(255,255,255,0.7); margin-bottom: 24px; font-size: 1.05rem; }
+  #s3 .feature-list { list-style: none; }
+  #s3 .feature-list li {
+    display: flex; align-items: center; gap: 10px;
+    color: white; padding: 8px 0; font-size: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  #s3 .feature-list li span.ic { font-size: 20px; }
+  #s3 .cat-demo {
+    flex: 0 0 auto;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    animation: floatY2 3s ease-in-out infinite;
+  }
+  #s3 .demo-label {
+    color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 4px;
+  }
+
+  /* ======================================
+     SLIDE 4 — HOW IT WORKS
+  ====================================== */
+  #s4 { background: linear-gradient(135deg, #0a0a1a, #1a0a2e); }
+  #s4 h2 { color: white; margin-bottom: 40px; }
+  #s4 .flow {
+    display: flex; align-items: center; gap: 0;
+    max-width: 900px; width: 100%;
+    flex-wrap: wrap; justify-content: center;
+  }
+  #s4 .flow-item {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; width: 160px;
+  }
+  #s4 .flow-circle {
+    width: 90px; height: 90px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; margin-bottom: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  #s4 .flow-item h3 { color: white; font-size: 0.95rem; margin-bottom: 4px; }
+  #s4 .flow-item p  { color: rgba(255,255,255,0.5); font-size: 0.78rem; }
+  #s4 .arrow { font-size: 28px; color: rgba(255,255,255,0.25); margin: 0 4px; padding-bottom: 28px; }
+  #s4 .ws-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 14px; padding: 16px 24px;
+    color: rgba(255,255,255,0.5); font-size: 0.82rem;
+    margin-top: 30px; text-align: center;
+  }
+  #s4 .ws-box code { color: var(--cyan); font-size: 0.9rem; }
+
+  /* ======================================
+     SLIDE 5 — CAT STATES SHOWCASE
+  ====================================== */
+  #s5 { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+  #s5 h2 { color: white; margin-bottom: 36px; }
+  #s5 .states-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 20px; max-width: 860px; width: 100%;
+  }
+  #s5 .state-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 20px 12px;
+    text-align: center; cursor: default;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  #s5 .state-card:hover { transform: translateY(-8px) scale(1.04); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+  #s5 .state-card .state-name {
+    color: white; font-weight: 700; font-size: 0.9rem; margin-top: 10px;
+  }
+  #s5 .state-card .state-desc {
+    color: rgba(255,255,255,0.45); font-size: 0.72rem; margin-top: 4px;
+  }
+  #s5 .state-card .cat-mini { transform: scale(0.55); transform-origin: top center; height: 85px; overflow: hidden; }
+
+  /* ======================================
+     SLIDE 6 — FEATURES DETAIL
+  ====================================== */
+  #s6 { background: linear-gradient(160deg, #1a1a2e 0%, #0a1628 100%); }
+  #s6 h2 { color: white; margin-bottom: 36px; }
+  #s6 .feat-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 18px; max-width: 860px; width: 100%;
+  }
+  #s6 .feat-card {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px; padding: 22px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  #s6 .feat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+  #s6 .feat-icon {
+    font-size: 32px; flex-shrink: 0;
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  }
+  #s6 .feat-text h3 { color: white; font-size: 1rem; margin-bottom: 6px; }
+  #s6 .feat-text p  { color: rgba(255,255,255,0.5); font-size: 0.82rem; line-height: 1.6; }
+
+  /* ======================================
+     SLIDE 7 — TEAM USE CASE
+  ====================================== */
+  #s7 { background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77); }
+  #s7 h2 { color: white; margin-bottom: 36px; }
+  #s7 .team-stage {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    max-width: 900px; width: 100%;
+  }
+  #s7 .member {
+    display: flex; flex-direction: column; align-items: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 20px 16px;
+    width: 150px;
+    transition: transform 0.3s;
+  }
+  #s7 .member:hover { transform: scale(1.06); }
+  #s7 .member .mname { color: white; font-weight: 700; font-size: 0.85rem; margin-top: 8px; }
+  #s7 .member .mstate {
+    font-size: 11px; margin-top: 4px; padding: 2px 10px;
+    border-radius: 999px; font-weight: 700;
+  }
+  #s7 .member .cat-wrap { transform: scale(0.65); transform-origin: top center; height: 92px; overflow: hidden; }
+
+  /* ======================================
+     SLIDE 8 — TECH STACK
+  ====================================== */
+  #s8 { background: linear-gradient(135deg, #16213e, #0f3460, #533483); }
+  #s8 h2 { color: white; margin-bottom: 36px; }
+  #s8 .tech-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; max-width: 780px; width: 100%;
+  }
+  #s8 .tech-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+    transition: transform 0.2s;
+  }
+  #s8 .tech-item:hover { transform: scale(1.03); }
+  #s8 .tech-icon { font-size: 28px; flex-shrink: 0; }
+  #s8 .tech-info h3 { color: white; font-size: 0.95rem; margin-bottom: 2px; }
+  #s8 .tech-info p  { color: rgba(255,255,255,0.45); font-size: 0.75rem; }
+  #s8 .badge-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    margin-top: 24px; max-width: 780px;
+  }
+  #s8 .lang-badge {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.8); border-radius: 999px;
+    padding: 5px 16px; font-size: 13px; font-weight: 700;
+  }
+
+  /* ======================================
+     SLIDE 9 — CTA / ENDING
+  ====================================== */
+  #s9 {
+    background: radial-gradient(ellipse at 30% 40%, #FF6B9D33 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 60%, #4ECDC433 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 80%, #FFD93D22 0%, transparent 50%),
+                linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  }
+  #s9 .cta-content { text-align: center; max-width: 700px; }
+  #s9 h2 {
+    background: linear-gradient(90deg, #FF6B9D, #FFD93D, #4ECDC4, #A855F7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    margin-bottom: 20px;
+  }
+  #s9 p  { color: rgba(255,255,255,0.65); font-size: 1.05rem; margin-bottom: 36px; }
+  #s9 .cta-cats { display: flex; gap: 24px; justify-content: center; margin-bottom: 40px; }
+  #s9 .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  #s9 .btn {
+    padding: 14px 36px; border-radius: 999px; font-size: 1rem; font-weight: 700;
+    border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  #s9 .btn:hover { transform: scale(1.06); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  #s9 .btn-primary {
+    background: linear-gradient(90deg, #FF6B9D, #A855F7);
+    color: white;
+  }
+  #s9 .btn-secondary {
+    background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.25); color: white;
+  }
+  #s9 .team-credit {
+    margin-top: 28px; color: rgba(255,255,255,0.3); font-size: 13px; letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="dots" id="dots"></div>
+<div class="slide-num" id="slideNum"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ===== SLIDE 1: TITLE ===== -->
+  <section class="slide active" id="s1">
+    <div class="bg-stars"></div>
+    <div class="title-wrap">
+      <div class="emoji-bg">🐱</div>
+      <div style="margin-bottom:16px;">
+        <span class="tag" style="background:rgba(255,107,157,0.2);color:#FF6B9D;border:1px solid #FF6B9D44;">
+          🏆 Hackathon 2025
+        </span>
+      </div>
+      <h1>🐱 Team Neko</h1>
+      <p class="subtitle">チームの"いま"を、かわいく可視化する</p>
+
+      <div class="cats-row">
+        <div style="animation:floatY 2.8s ease-in-out infinite;">
+          <div class="cat-container state-typing" style="--cat-color:#FF6B9D">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#FF6B9D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#FF6B9D"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#FF6B9D"></div><div class="cat-paw" style="background:#FF6B9D"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#FF6B9D"></div>
+            <div class="cat-zzz">Z z z</div>
+            <div class="cat-collar" style="background:#FF6B9D"><span class="cat-collar-bell">🔔</span><span class="cat-collar-text">Hana</span></div>
+          </div>
+        </div>
+        <div style="animation:floatY2 3.2s ease-in-out infinite 0.5s;">
+          <div class="cat-container size-lg state-idle" style="--cat-color:#4ECDC4">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#4ECDC4"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#4ECDC4"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#4ECDC4"></div><div class="cat-paw" style="background:#4ECDC4"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#4ECDC4"></div>
+            <div class="cat-zzz">Z z z</div>
+            <div class="cat-collar" style="background:#4ECDC4"><span class="cat-collar-bell">🔔</span><span class="cat-collar-text">Taro</span></div>
+          </div>
+        </div>
+        <div style="animation:floatY 3.5s ease-in-out infinite 1s;">
+          <div class="cat-container state-clicking" style="--cat-color:#A855F7">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#A855F7"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#A855F7"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#A855F7"></div><div class="cat-paw" style="background:#A855F7"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#A855F7"></div>
+            <div class="cat-zzz">Z z z</div>
+            <div class="cat-collar" style="background:#A855F7"><span class="cat-collar-bell">🔔</span><span class="cat-collar-text">Kei</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tag-bar">
+        <span class="hashtag">#ElectronApp</span>
+        <span class="hashtag">#React</span>
+        <span class="hashtag">#TeamPresence</span>
+        <span class="hashtag">#かわいい</span>
+        <span class="hashtag">#WebSocket</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 2: PROBLEM ===== -->
+  <section class="slide" id="s2">
+    <div style="margin-bottom:8px;">
+      <span class="tag" style="background:rgba(255,107,157,0.15);color:#FF6B9D;border:1px solid #FF6B9D44;">😤 課題</span>
+    </div>
+    <h2 style="color:white;margin-bottom:8px;">リモートワークの<span class="accent">あるある</span>問題</h2>
+    <p style="color:rgba(255,255,255,0.5);margin-bottom:32px;">「今チームのみんな何してるんだろう？」</p>
+
+    <div class="problem-grid">
+      <div class="prob-card">
+        <span class="prob-icon">👻</span>
+        <h3>存在感ゼロ問題</h3>
+        <p>オンラインなのに、誰が何をしているか全くわからない</p>
+      </div>
+      <div class="prob-card">
+        <span class="prob-icon">💬</span>
+        <h3>話しかけタイミング迷子</h3>
+        <p>「今忙しいかな？」と毎回チャットするのが申し訳ない</p>
+      </div>
+      <div class="prob-card">
+        <span class="prob-icon">😴</span>
+        <h3>離席バレない問題</h3>
+        <p>ステータスが「オンライン」でも実は寝てる、なんてことも</p>
+      </div>
+    </div>
+
+    <div style="margin-top:36px;padding:20px 40px;background:rgba(255,107,157,0.08);border:1px solid rgba(255,107,157,0.2);border-radius:16px;max-width:560px;">
+      <p style="color:rgba(255,255,255,0.7);text-align:center;font-size:1.05rem;">
+        ツールのステータスは<strong style="color:#FFD93D">「文字情報」</strong>だけ。<br>
+        チームの<strong style="color:#FF6B9D">「空気感」</strong>は伝わらない。
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 3: SOLUTION ===== -->
+  <section class="slide" id="s3">
+    <div class="sol-layout">
+      <div class="sol-text">
+        <span class="tag" style="background:rgba(78,205,196,0.15);color:#4ECDC4;border:1px solid #4ECDC444;margin-bottom:20px;display:inline-block;">✨ ソリューション</span>
+        <h2 style="color:white;font-size:clamp(1.6rem,3.5vw,2.6rem);">
+          チームの活動を<br>
+          <span class="highlight">かわいい猫</span>で<br>
+          リアルタイム可視化！
+        </h2>
+        <p style="margin-top:20px;">
+          キーボード・マウスの動きを自動検出し、<br>
+          チームメンバーの「今の状態」を猫キャラクターで表現。<br>
+          見るだけで雰囲気が伝わる、新感覚チーム可視化ツール。
+        </p>
+        <ul class="feature-list" style="margin-top:16px;">
+          <li><span class="ic">⌨️</span> タイピング中は猫がカタカタ</li>
+          <li><span class="ic">🖱️</span> クリック中は肉球でタップ</li>
+          <li><span class="ic">😴</span> 離席したら猫がスヤスヤ</li>
+          <li><span class="ic">🌐</span> WebSocketでリアルタイム同期</li>
+          <li><span class="ic">🖥️</span> デスクトップ上にオーバーレイ表示</li>
+        </ul>
+      </div>
+
+      <div class="cat-demo">
+        <div class="cat-container size-lg state-typing" style="--cat-color:#FF6B9D">
+          <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div></div>
+          <div class="cat-head" style="background:#FF6B9D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+          <div class="cat-body" style="background:#FF6B9D"></div>
+          <div class="cat-paws"><div class="cat-paw" style="background:#FF6B9D"></div><div class="cat-paw" style="background:#FF6B9D"></div></div>
+          <div class="cat-tail" style="border-bottom-color:#FF6B9D"></div>
+          <div class="cat-zzz">Z z z</div>
+          <div class="cat-collar" style="background:#FF6B9D"><span class="cat-collar-bell">🔔</span><span class="cat-collar-text">あなた</span></div>
+        </div>
+        <p class="demo-label">⌨️ タイピング中…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 4: HOW IT WORKS ===== -->
+  <section class="slide" id="s4">
+    <span class="tag" style="background:rgba(168,85,247,0.15);color:#A855F7;border:1px solid #A855F744;margin-bottom:20px;">⚙️ 仕組み</span>
+    <h2 style="color:white;margin-bottom:40px;">どうやって動いてるの？</h2>
+
+    <div class="flow">
+      <div class="flow-item">
+        <div class="flow-circle" style="background:linear-gradient(135deg,#FF6B9D,#FF8C42);">⌨️</div>
+        <h3>入力検出</h3>
+        <p>グローバルフックでキーボード・マウス操作を検知</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-item">
+        <div class="flow-circle" style="background:linear-gradient(135deg,#FFD93D,#FF8C42);">🧠</div>
+        <h3>状態分類</h3>
+        <p>入力パターンから5種類の活動状態に自動判定</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-item">
+        <div class="flow-circle" style="background:linear-gradient(135deg,#4ECDC4,#45B7D1);">📡</div>
+        <h3>WebSocket送信</h3>
+        <p>リアルタイムでチームサーバーへ状態を配信</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-item">
+        <div class="flow-circle" style="background:linear-gradient(135deg,#A855F7,#6366F1);">🐱</div>
+        <h3>猫で表示</h3>
+        <p>全メンバーの状態をアニメーション猫で可視化</p>
+      </div>
+    </div>
+
+    <div class="ws-box" style="margin-top:32px;">
+      <p>📡 WebSocket Server &nbsp;<code>:9876</code>&nbsp; がチームの状態をリアルタイムにブロードキャスト</p>
+      <p style="margin-top:6px;font-size:0.75rem;">60秒間応答なし → 自動でチームリストから除外 / 自動再接続機能付き</p>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 5: CAT STATES ===== -->
+  <section class="slide" id="s5">
+    <span class="tag" style="background:rgba(255,217,61,0.15);color:#FFD93D;border:1px solid #FFD93D44;margin-bottom:20px;">🎨 キャラクター</span>
+    <h2 style="color:white;margin-bottom:36px;">5つの状態を猫で表現</h2>
+
+    <div class="states-grid">
+      <!-- idle -->
+      <div class="state-card">
+        <div class="cat-mini">
+          <div class="cat-container state-idle" style="--cat-color:#6BCB77">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#6BCB77"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#6BCB77"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#6BCB77"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#6BCB77"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#6BCB77"></div><div class="cat-paw" style="background:#6BCB77"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#6BCB77"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="state-name">😌 アイドル</div>
+        <div class="state-desc">のんびりしてる</div>
+      </div>
+      <!-- typing -->
+      <div class="state-card">
+        <div class="cat-mini">
+          <div class="cat-container state-typing speed-fast" style="--cat-color:#FF6B9D">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#FF6B9D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#FF6B9D"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#FF6B9D"></div><div class="cat-paw" style="background:#FF6B9D"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#FF6B9D"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="state-name">⌨️ タイピング</div>
+        <div class="state-desc">猫がカタカタ</div>
+      </div>
+      <!-- clicking -->
+      <div class="state-card">
+        <div class="cat-mini">
+          <div class="cat-container state-clicking" style="--cat-color:#FFD93D">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FFD93D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FFD93D"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#FFD93D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#FFD93D"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#FFD93D"></div><div class="cat-paw" style="background:#FFD93D"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#FFD93D"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="state-name">🖱️ クリック</div>
+        <div class="state-desc">肉球ポチポチ</div>
+      </div>
+      <!-- scrolling -->
+      <div class="state-card">
+        <div class="cat-mini">
+          <div class="cat-container state-scrolling" style="--cat-color:#4ECDC4">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#4ECDC4"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#4ECDC4"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#4ECDC4"></div><div class="cat-paw" style="background:#4ECDC4"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#4ECDC4"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="state-name">📜 スクロール</div>
+        <div class="state-desc">目がキョロキョロ</div>
+      </div>
+      <!-- sleeping -->
+      <div class="state-card">
+        <div class="cat-mini">
+          <div class="cat-container state-sleeping" style="--cat-color:#A855F7">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#A855F7"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#A855F7"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#A855F7"></div><div class="cat-paw" style="background:#A855F7"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#A855F7"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="state-name">💤 スリープ</div>
+        <div class="state-desc">30秒操作なし</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 6: FEATURES ===== -->
+  <section class="slide" id="s6">
+    <span class="tag" style="background:rgba(107,203,119,0.15);color:#6BCB77;border:1px solid #6BCB7744;margin-bottom:20px;">🌟 機能</span>
+    <h2 style="color:white;margin-bottom:36px;">主な機能一覧</h2>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🖥️</div>
+        <div class="feat-text">
+          <h3>デスクトップオーバーレイ</h3>
+          <p>透明な常時前面ウィンドウとして表示。作業の邪魔をしない設計。マウスイベントもスルー。</p>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-text">
+          <h3>リアルタイム同期</h3>
+          <p>WebSocketで即時ブロードキャスト。切断時は3秒後に自動再接続。</p>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎭</div>
+        <div class="feat-text">
+          <h3>デモモード</h3>
+          <p>架空のチームメンバーを自動生成してデモ可能。一人でも楽しめる。</p>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎨</div>
+        <div class="feat-text">
+          <h3>カラーカスタマイズ</h3>
+          <p>各メンバーの猫カラーは個別設定可能。首輪に名前も表示。</p>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔄</div>
+        <div class="feat-text">
+          <h3>自動クリーンアップ</h3>
+          <p>60秒以上応答のないメンバーは自動削除。常に最新状態を維持。</p>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-text">
+          <h3>サーバー兼クライアント</h3>
+          <p>各クライアントがWsサーバーも起動可能。ポート競合時は自動でクライアント専用モードへ。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 7: USE CASE ===== -->
+  <section class="slide" id="s7">
+    <span class="tag" style="background:rgba(255,140,66,0.15);color:#FF8C42;border:1px solid #FF8C4244;margin-bottom:20px;">👥 ユースケース</span>
+    <h2 style="color:white;margin-bottom:16px;">チーム全員の今がひと目でわかる</h2>
+    <p style="color:rgba(255,255,255,0.5);margin-bottom:32px;">こんなチームの雰囲気が画面の隅でリアルタイムに見える</p>
+
+    <div class="team-stage">
+      <div class="member">
+        <div class="cat-wrap">
+          <div class="cat-container state-typing speed-fast" style="--cat-color:#FF6B9D">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#FF6B9D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#FF6B9D"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#FF6B9D"></div><div class="cat-paw" style="background:#FF6B9D"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#FF6B9D"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="mname">🌸 Hana</div>
+        <div class="mstate" style="background:rgba(255,107,157,0.2);color:#FF6B9D;">⌨️ コーディング中</div>
+      </div>
+      <div class="member">
+        <div class="cat-wrap">
+          <div class="cat-container state-idle" style="--cat-color:#4ECDC4">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#4ECDC4"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#4ECDC4"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#4ECDC4"></div><div class="cat-paw" style="background:#4ECDC4"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#4ECDC4"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="mname">🌊 Taro</div>
+        <div class="mstate" style="background:rgba(78,205,196,0.2);color:#4ECDC4;">😌 待機中</div>
+      </div>
+      <div class="member">
+        <div class="cat-wrap">
+          <div class="cat-container state-sleeping" style="--cat-color:#A855F7">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#A855F7"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#A855F7"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#A855F7"></div><div class="cat-paw" style="background:#A855F7"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#A855F7"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="mname">⭐ Kei</div>
+        <div class="mstate" style="background:rgba(168,85,247,0.2);color:#A855F7;">💤 離席中</div>
+      </div>
+      <div class="member">
+        <div class="cat-wrap">
+          <div class="cat-container state-clicking" style="--cat-color:#FFD93D">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FFD93D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FFD93D"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#FFD93D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#FFD93D"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#FFD93D"></div><div class="cat-paw" style="background:#FFD93D"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#FFD93D"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="mname">☀️ Mika</div>
+        <div class="mstate" style="background:rgba(255,217,61,0.2);color:#FFD93D;">🖱️ レビュー中</div>
+      </div>
+      <div class="member">
+        <div class="cat-wrap">
+          <div class="cat-container state-scrolling" style="--cat-color:#6BCB77">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#6BCB77"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#6BCB77"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#6BCB77"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#6BCB77"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#6BCB77"></div><div class="cat-paw" style="background:#6BCB77"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#6BCB77"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div class="mname">🌿 Ryo</div>
+        <div class="mstate" style="background:rgba(107,203,119,0.2);color:#6BCB77;">📜 読み込み中</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 8: TECH STACK ===== -->
+  <section class="slide" id="s8">
+    <span class="tag" style="background:rgba(99,102,241,0.15);color:#818CF8;border:1px solid #818CF844;margin-bottom:20px;">🔧 技術スタック</span>
+    <h2 style="color:white;margin-bottom:36px;">使用技術</h2>
+
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-icon">⚡</div>
+        <div class="tech-info">
+          <h3>Electron 41</h3>
+          <p>クロスプラットフォームデスクトップアプリ</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">⚛️</div>
+        <div class="tech-info">
+          <h3>React 19</h3>
+          <p>最新Reactで構築されたUI</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🔷</div>
+        <div class="tech-info">
+          <h3>TypeScript</h3>
+          <p>strictモードで型安全に開発</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🌐</div>
+        <div class="tech-info">
+          <h3>WebSocket (ws)</h3>
+          <p>リアルタイムチーム状態同期</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🎣</div>
+        <div class="tech-info">
+          <h3>uiohook-napi</h3>
+          <p>グローバル入力フック（ネイティブ）</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">📦</div>
+        <div class="tech-info">
+          <h3>electron-vite</h3>
+          <p>高速ビルド & Portableパッケージング</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="badge-row">
+      <span class="lang-badge">TypeScript</span>
+      <span class="lang-badge">CSS3 Animations</span>
+      <span class="lang-badge">HTML5 BroadcastChannel</span>
+      <span class="lang-badge">Node.js</span>
+      <span class="lang-badge">Windows Portable EXE</span>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 9: CTA ===== -->
+  <section class="slide" id="s9">
+    <div class="cta-content">
+      <div class="cta-cats">
+        <div style="animation:floatY 2.5s ease-in-out infinite 0s;">
+          <div class="cat-container state-typing" style="--cat-color:#FF6B9D">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#FF6B9D"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#FF6B9D"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#FF6B9D"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#FF6B9D"></div><div class="cat-paw" style="background:#FF6B9D"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#FF6B9D"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div style="animation:floatY2 3s ease-in-out infinite 0.7s;">
+          <div class="cat-container state-idle" style="--cat-color:#4ECDC4">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#4ECDC4"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#4ECDC4"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#4ECDC4"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#4ECDC4"></div><div class="cat-paw" style="background:#4ECDC4"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#4ECDC4"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+        <div style="animation:floatY 2.8s ease-in-out infinite 1.4s;">
+          <div class="cat-container state-clicking" style="--cat-color:#A855F7">
+            <div class="cat-ears"><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div><div class="cat-ear" style="border-bottom-color:#A855F7"><div class="cat-ear-inner"></div></div></div>
+            <div class="cat-head" style="background:#A855F7"><div class="cat-eyes"><div class="cat-eye"><div class="cat-pupil"></div></div><div class="cat-eye"><div class="cat-pupil"></div></div></div><div class="cat-nose"></div><div class="cat-mouth"><div class="cat-mouth-line"></div><div class="cat-mouth-line"></div></div><div class="cat-whiskers"><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div><div class="cat-whisker-group"><div class="cat-whisker"></div><div class="cat-whisker"></div></div></div></div>
+            <div class="cat-body" style="background:#A855F7"></div>
+            <div class="cat-paws"><div class="cat-paw" style="background:#A855F7"></div><div class="cat-paw" style="background:#A855F7"></div></div>
+            <div class="cat-tail" style="border-bottom-color:#A855F7"></div>
+            <div class="cat-zzz">Z z z</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>チームに猫を飼おう🐱</h2>
+      <p>
+        リモートワークをもっと楽しく、もっとつながりある体験へ。<br>
+        <strong style="color:white;">Team Neko</strong> でチームの「今」を可愛くシェアしよう！
+      </p>
+
+      <div class="cta-buttons">
+        <a class="btn btn-primary" href="#">🐱 今すぐ試す</a>
+        <a class="btn btn-secondary" href="#">📦 ダウンロード</a>
+      </div>
+
+      <p class="team-credit">Made with ❤️ by Team Neko · Hackathon 2025</p>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="changeSlide(-1)">←</button>
+  <button id="nextBtn" onclick="changeSlide(1)">→</button>
+</div>
+<div class="dots" id="dots"></div>
+<div class="slide-num" id="slideNum"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function buildDots() {
+    const dots = document.getElementById('dots');
+    dots.innerHTML = '';
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dots.appendChild(d);
+    });
+  }
+
+  function updateUI() {
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    document.getElementById('slideNum').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('prevBtn').style.opacity = current === 0 ? '0.3' : '1';
+    document.getElementById('nextBtn').style.opacity = current === slides.length - 1 ? '0.3' : '1';
+  }
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    slides[current].classList.add('prev');
+    setTimeout(() => slides[current].classList.remove('prev'), 600);
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    updateUI();
+  }
+
+  function changeSlide(dir) {
+    goTo(current + dir);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') { e.preventDefault(); changeSlide(-1); }
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
+  });
+
+  buildDots();
+  updateUI();
+</script>
+</body>
+</html>
