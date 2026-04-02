@@ -128,9 +128,9 @@ function createTray(): void {
   })
 }
 
-app.whenReady().then(() => {
-  // Start WebSocket server for team sync
-  startWSServer()
+app.whenReady().then(async () => {
+  // Start WebSocket server for team sync (gracefully handles port-in-use)
+  await startWSServer()
 
   // IPC: get server address for renderer
   ipcMain.handle('get-server-address', () => {

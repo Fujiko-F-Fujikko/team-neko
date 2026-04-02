@@ -16,24 +16,39 @@ export function getLocalIP(): string {
   return '127.0.0.1'
 }
 
-export function startWSServer(): WebSocketServer {
-  wss = new WebSocketServer({ port: WS_PORT, host: '0.0.0.0' })
+export function startWSServer(): Promise<WebSocketServer | null> {
+  return new Promise((resolve) => {
+    const server = new WebSocketServer({ port: WS_PORT, host: '0.0.0.0' })
 
-  wss.on('connection', (ws) => {
-    // Broadcast incoming messages to all other clients
-    ws.on('message', (data) => {
-      const msg = data.toString()
-      wss?.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(msg)
-        }
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`[Team Neko] Port ${WS_PORT} already in use - connecting as client only`)
+        resolve(null)
+      } else {
+        console.error('[Team Neko] WebSocket server error:', err)
+        resolve(null)
+      }
+    })
+
+    server.on('listening', () => {
+      wss = server
+      const ip = getLocalIP()
+      console.log(`[Team Neko] WebSocket server running on ws://${ip}:${WS_PORT}`)
+
+      server.on('connection', (ws) => {
+        ws.on('message', (data) => {
+          const msg = data.toString()
+          wss?.clients.forEach((client) => {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+              client.send(msg)
+            }
+          })
+        })
       })
+
+      resolve(server)
     })
   })
-
-  const ip = getLocalIP()
-  console.log(`[Team Neko] WebSocket server running on ws://${ip}:${WS_PORT}`)
-  return wss
 }
 
 export function stopWSServer(): void {
