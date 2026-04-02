@@ -95,6 +95,16 @@ export default function App() {
     window.electronAPI.onOverlayModeChanged((overlay) => setIsOverlay(overlay))
   }, [])
 
+  // オーバーレイモードで未参加の場合はフォーム操作できるようにクリックスルーを無効化
+  useEffect(() => {
+    if (!window.electronAPI) return
+    if (isOverlay && !joined) {
+      window.electronAPI.setIgnoreMouseEvents(false)
+    } else if (isOverlay && joined) {
+      window.electronAPI.setIgnoreMouseEvents(true, { forward: true })
+    }
+  }, [isOverlay, joined])
+
   const teamPresence = useTeamPresence(
     joined ? { memberName, serverAddress, localState: currentState, keyPressCount: activity.keyPressCount, mouseClickCount: activity.mouseClickCount } : null
   )
