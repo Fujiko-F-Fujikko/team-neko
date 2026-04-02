@@ -16,11 +16,12 @@ let overlayMode = true // Start in overlay mode by default (Bongo Cat style)
 function createWindow(): BrowserWindow {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
 
+  // 全画面透過オーバーレイ（各ネコを自由に配置できるよう全画面確保）
   mainWindow = new BrowserWindow({
-    width: 250,
-    height: 280,
-    x: screenWidth - 280,
-    y: screenHeight - 310,
+    width: screenWidth,
+    height: screenHeight,
+    x: 0,
+    y: 0,
     title: 'Team Neko',
     frame: false,
     transparent: true,
@@ -34,6 +35,9 @@ function createWindow(): BrowserWindow {
       sandbox: false
     }
   })
+
+  // 透明領域はクリックスルー、ネコ部分はドラッグ操作を受け付ける
+  mainWindow.setIgnoreMouseEvents(true, { forward: true })
 
   if (process.env.ELECTRON_RENDERER_URL) {
     mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
@@ -92,17 +96,19 @@ function toggleOverlayMode(): void {
   overlayMode = !overlayMode
 
   if (overlayMode) {
-    // Switch to overlay mode (Bongo Cat style)
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize
     mainWindow.setAlwaysOnTop(true, 'floating')
     mainWindow.setSkipTaskbar(true)
     mainWindow.setResizable(false)
-    mainWindow.setSize(250, 280)
+    mainWindow.setSize(sw, sh)
+    mainWindow.setPosition(0, 0)
+    mainWindow.setIgnoreMouseEvents(true, { forward: true })
     mainWindow.webContents.send('overlay-mode-changed', true)
   } else {
-    // Switch to normal windowed mode
     mainWindow.setAlwaysOnTop(false)
     mainWindow.setSkipTaskbar(false)
     mainWindow.setResizable(true)
+    mainWindow.setIgnoreMouseEvents(false)
     mainWindow.setSize(480, 600)
     mainWindow.webContents.send('overlay-mode-changed', false)
   }
@@ -182,6 +188,14 @@ app.whenReady().then(async () => {
   ipcMain.on('toggle-overlay', () => {
     toggleOverlayMode()
   })
+
+  // IPC: ドラッグ中のクリックスルー一時切替
+  ipcMain.on('set-ignore-mouse-events', (_event, ignore: boolean, options?: { forward: boolean }) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setIgnoreMouseEvents(ignore, options ?? {})
+    }
+  })
+
 
   const win = createWindow()
   setupActivityIPC(win)

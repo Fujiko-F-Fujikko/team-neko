@@ -9,5 +9,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   toggleOverlay: () => ipcRenderer.send('toggle-overlay'),
   onOverlayModeChanged: (callback: (isOverlay: boolean) => void) => {
     ipcRenderer.on('overlay-mode-changed', (_event, isOverlay) => callback(isOverlay))
-  }
+  },
+  resizeOverlay: (memberCount: number) => ipcRenderer.send('resize-overlay', memberCount),
+  setIgnoreMouseEvents: (ignore: boolean, options?: { forward: boolean }) =>
+    ipcRenderer.send('set-ignore-mouse-events', ignore, options)
 })

@@ -59,7 +59,12 @@ export default function Cat({ state, name, color = '#555', fast = false }: CatPr
       </div>
       <div className="cat-tail" style={{ borderBottomColor: color }} />
       <div className="cat-zzz">Z z z</div>
-      {name && <div style={{ marginTop: 8, fontSize: 14, fontWeight: 'bold', color: '#333' }}>{name}</div>}
+      {name && (
+        <div className="cat-collar" style={{ background: color }}>
+          <span className="cat-collar-bell">🔔</span>
+          <span className="cat-collar-text">{name}</span>
+        </div>
+      )}
     </div>
   )
 }

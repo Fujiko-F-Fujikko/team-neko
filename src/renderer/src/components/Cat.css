@@ -287,6 +287,41 @@
   100% { opacity: 0; transform: translate(20px, -30px) scale(1.2); }
 }
 
+/* Collar nameplate - 首の位置に絶対配置 */
+.cat-collar {
+  position: absolute;
+  /* ears ~18px + head ~85px = 首の位置 */
+  top: 103px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 9px 2px 5px;
+  border-radius: 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  letter-spacing: 0.3px;
+}
+
+.cat-collar-bell {
+  font-size: 12px;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  flex-shrink: 0;
+}
+
+.cat-collar-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Speed modifier for activity intensity */
 .cat-container.speed-fast .cat-paw:first-child,
 .cat-container.speed-fast .cat-paw:last-child {

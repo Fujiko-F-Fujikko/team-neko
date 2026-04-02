@@ -7,6 +7,8 @@ interface ElectronAPI {
   reportActivity: (type: 'key' | 'click' | 'scroll') => void
   toggleOverlay: () => void
   onOverlayModeChanged: (callback: (isOverlay: boolean) => void) => void
+  resizeOverlay: (memberCount: number) => void
+  setIgnoreMouseEvents: (ignore: boolean, options?: { forward: boolean }) => void
 }
 
 declare global {
