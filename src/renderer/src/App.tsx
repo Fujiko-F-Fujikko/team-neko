@@ -147,26 +147,25 @@ export default function App() {
 
   // ===== ドラッグ =====
   const dragging = useRef<{ id: string; startMouseX: number; startMouseY: number; startCatX: number; startCatY: number } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   const handleMouseDown = (memberId: string, e: React.MouseEvent) => {
     e.preventDefault()
     const pos = catPos[memberId] ?? { x: 0, y: 0, scale: DEFAULT_SCALE }
     dragging.current = { id: memberId, startMouseX: e.clientX, startMouseY: e.clientY, startCatX: pos.x, startCatY: pos.y }
-    window.electronAPI?.setIgnoreMouseEvents(false)
+    setIsDragging(true)
+  }
 
-    const onMove = (ev: MouseEvent) => {
-      if (!dragging.current) return
-      const { id, startMouseX, startMouseY, startCatX, startCatY } = dragging.current
-      setCatPos(prev => ({ ...prev, [id]: { ...prev[id], x: startCatX + ev.clientX - startMouseX, y: startCatY + ev.clientY - startMouseY } }))
-    }
-    const onUp = () => {
-      dragging.current = null
-      window.electronAPI?.setIgnoreMouseEvents(true, { forward: true })
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup',   onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup',   onUp)
+  const handleDragMove = (e: React.MouseEvent) => {
+    if (!dragging.current) return
+    const { id, startMouseX, startMouseY, startCatX, startCatY } = dragging.current
+    setCatPos(prev => ({ ...prev, [id]: { ...prev[id], x: startCatX + e.clientX - startMouseX, y: startCatY + e.clientY - startMouseY } }))
+  }
+
+  const handleDragEnd = () => {
+    dragging.current = null
+    setIsDragging(false)
+    window.electronAPI?.setIgnoreMouseEvents(true, { forward: true })
   }
 
   const handleWheel = (memberId: string, e: React.WheelEvent) => {
@@ -255,7 +254,9 @@ export default function App() {
           const { x, y, scale } = catPos[member.memberId] ?? { x: 20, y: window.innerHeight - CAT_H * DEFAULT_SCALE - 20, scale: DEFAULT_SCALE }
           return (
             <div key={member.memberId}
-              style={{ position: 'absolute', left: x, top: y, width: CAT_W * scale, height: CAT_H * scale, cursor: 'grab', userSelect: 'none', background: 'rgba(0,0,0,0.01)' }}
+              style={{ position: 'absolute', left: x, top: y, width: CAT_W * scale, height: CAT_H * scale, cursor: isDragging && dragging.current?.id === member.memberId ? 'grabbing' : 'grab', userSelect: 'none', background: 'rgba(0,0,0,0.01)' }}
+              onMouseEnter={() => window.electronAPI?.setIgnoreMouseEvents(false)}
+              onMouseLeave={() => { if (!dragging.current) window.electronAPI?.setIgnoreMouseEvents(true, { forward: true }) }}
               onMouseDown={(e) => handleMouseDown(member.memberId, e)}
               onWheel={(e) => handleWheel(member.memberId, e)}
             >
@@ -265,6 +266,15 @@ export default function App() {
             </div>
           )
         })}
+        {/* ドラッグ中: 全画面キャプチャdivでマウスイベントを確実に捕捉 */}
+        {isDragging && (
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, cursor: 'grabbing', background: 'rgba(0,0,0,0.01)' }}
+            onMouseMove={handleDragMove}
+            onMouseUp={handleDragEnd}
+            onMouseLeave={handleDragEnd}
+          />
+        )}
       </div>
     )
   }
