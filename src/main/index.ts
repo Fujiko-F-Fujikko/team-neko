@@ -9,23 +9,25 @@ const WS_PORT = 9876
 app.disableHardwareAcceleration()
 
 let mainWindow: BrowserWindow | null = null
+let settingsWindow: BrowserWindow | null = null
 let tray: Tray | null = null
-let overlayMode = false
+let overlayMode = true // Start in overlay mode by default (Bongo Cat style)
 
 function createWindow(): BrowserWindow {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
 
   mainWindow = new BrowserWindow({
-    width: 480,
-    height: 600,
-    x: screenWidth - 500,
-    y: screenHeight - 620,
+    width: 250,
+    height: 280,
+    x: screenWidth - 280,
+    y: screenHeight - 310,
     title: 'Team Neko',
-    frame: true,
-    transparent: false,
-    alwaysOnTop: false,
-    skipTaskbar: false,
-    resizable: true,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: false,
+    hasShadow: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -43,7 +45,45 @@ function createWindow(): BrowserWindow {
     mainWindow = null
   })
 
+  // Send initial overlay mode state after load
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow?.webContents.send('overlay-mode-changed', overlayMode)
+  })
+
   return mainWindow
+}
+
+function openSettingsWindow(): void {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.focus()
+    return
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 480,
+    height: 600,
+    title: 'Team Neko - 設定',
+    frame: true,
+    transparent: false,
+    alwaysOnTop: false,
+    resizable: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      contextIsolation: true,
+      sandbox: false
+    }
+  })
+
+  // Load same URL but with settings hash
+  if (process.env.ELECTRON_RENDERER_URL) {
+    settingsWindow.loadURL(process.env.ELECTRON_RENDERER_URL + '#settings')
+  } else {
+    settingsWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'settings' })
+  }
+
+  settingsWindow.on('closed', () => {
+    settingsWindow = null
+  })
 }
 
 function toggleOverlayMode(): void {
@@ -52,16 +92,18 @@ function toggleOverlayMode(): void {
   overlayMode = !overlayMode
 
   if (overlayMode) {
-    // Switch to overlay mode
+    // Switch to overlay mode (Bongo Cat style)
     mainWindow.setAlwaysOnTop(true, 'floating')
     mainWindow.setSkipTaskbar(true)
-    mainWindow.setIgnoreMouseEvents(true, { forward: true })
+    mainWindow.setResizable(false)
+    mainWindow.setSize(250, 280)
     mainWindow.webContents.send('overlay-mode-changed', true)
   } else {
-    // Switch to normal mode
+    // Switch to normal windowed mode
     mainWindow.setAlwaysOnTop(false)
     mainWindow.setSkipTaskbar(false)
-    mainWindow.setIgnoreMouseEvents(false)
+    mainWindow.setResizable(true)
+    mainWindow.setSize(480, 600)
     mainWindow.webContents.send('overlay-mode-changed', false)
   }
 }
@@ -82,18 +124,16 @@ function createTray(): void {
       },
       { type: 'separator' },
       {
-        label: overlayMode ? 'ノーマルモード' : 'オーバーレイモード',
+        label: overlayMode ? 'ウィンドウモード' : 'オーバーレイモード',
         click: () => {
           toggleOverlayMode()
           updateMenu()
         }
       },
       {
-        label: '常に最前面',
-        type: 'checkbox',
-        checked: mainWindow?.isAlwaysOnTop() ?? false,
-        click: (item) => {
-          mainWindow?.setAlwaysOnTop(item.checked)
+        label: 'チーム設定...',
+        click: () => {
+          openSettingsWindow()
         }
       },
       { type: 'separator' },

@@ -14,27 +14,33 @@ export function useTeamPresence(options: UseTeamPresenceOptions | null) {
   const [members, setMembers] = useState<ActivityPayload[]>([])
   const [connected, setConnected] = useState(false)
 
+  const memberName = options?.memberName ?? ''
+  const serverAddress = options?.serverAddress ?? ''
+  const localState = options?.localState ?? 'idle'
+  const kpCount = options?.keyPressCount ?? 0
+  const mcCount = options?.mouseClickCount ?? 0
+
   useEffect(() => {
-    if (!options) return
+    if (!memberName || !serverAddress) return
 
     onTeamUpdate((updatedMembers) => {
       setMembers([...updatedMembers])
       setConnected(true)
     })
 
-    joinTeam(options.memberName, options.serverAddress)
+    joinTeam(memberName, serverAddress)
 
     return () => {
       leaveTeam()
       setConnected(false)
     }
-  }, [options?.memberName, options?.serverAddress])
+  }, [memberName, serverAddress])
 
   // Update activity when local state changes
   useEffect(() => {
-    if (!options) return
-    updateActivity(options.localState, options.keyPressCount, options.mouseClickCount)
-  }, [options?.localState, options?.keyPressCount, options?.mouseClickCount])
+    if (!memberName || !serverAddress) return
+    updateActivity(localState, kpCount, mcCount)
+  }, [memberName, serverAddress, localState, kpCount, mcCount])
 
   const localMemberId = getLocalMemberId()
 
