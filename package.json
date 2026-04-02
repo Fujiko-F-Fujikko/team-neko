@@ -1,23 +1,44 @@
 {
   "name": "team-neko",
   "version": "1.0.0",
-  "description": "",
+  "description": "Team activity visualizer with cute cats",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "dev:web": "npx vite --config vite.renderer.config.ts",
     "build": "electron-vite build",
-    "preview": "electron-vite preview"
+    "preview": "electron-vite preview",
+    "pack": "electron-vite build && electron-builder --dir",
+    "dist": "electron-vite build && electron-builder"
   },
   "keywords": [],
-  "author": "",
+  "author": "Team Neko",
   "license": "ISC",
   "type": "commonjs",
+  "build": {
+    "appId": "com.team-neko.app",
+    "productName": "Team Neko",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "artifactName": "TeamNeko.exe"
+    },
+    "extraResources": [],
+    "asar": true,
+    "npmRebuild": false
+  },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "electron": "^41.1.1",
-    "electron-vite": "^5.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "uiohook-napi": "^1.5.5",
@@ -28,6 +49,9 @@
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^41.1.1",
+    "electron-builder": "^26.8.1",
+    "electron-vite": "^5.0.0",
     "typescript": "^6.0.2"
   }
 }
