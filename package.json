@@ -1,0 +1,33 @@
+{
+  "name": "team-neko",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "dev:web": "npx vite --config vite.renderer.config.ts",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "electron": "^41.1.1",
+    "electron-vite": "^5.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "uiohook-napi": "^1.5.5",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^6.0.2"
+  }
+}

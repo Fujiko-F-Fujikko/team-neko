@@ -1,0 +1,294 @@
+.cat-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 200px;
+  height: 220px;
+  user-select: none;
+}
+
+/* Ears */
+.cat-ears {
+  display: flex;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -12px;
+}
+
+.cat-ear {
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 30px solid #555;
+}
+
+.cat-ear-inner {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 18px solid #ffb6c1;
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cat-ear {
+  position: relative;
+}
+
+/* Head */
+.cat-head {
+  width: 120px;
+  height: 100px;
+  background: #555;
+  border-radius: 50% 50% 45% 45%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Eyes */
+.cat-eyes {
+  display: flex;
+  gap: 30px;
+  margin-top: -5px;
+}
+
+.cat-eye {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.cat-pupil {
+  width: 10px;
+  height: 10px;
+  background: #222;
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  transition: transform 0.2s ease;
+}
+
+/* Nose & Mouth */
+.cat-nose {
+  width: 8px;
+  height: 6px;
+  background: #ffb6c1;
+  border-radius: 50%;
+  margin-top: 4px;
+}
+
+.cat-mouth {
+  display: flex;
+  gap: 0;
+  margin-top: 1px;
+}
+
+.cat-mouth-line {
+  width: 10px;
+  height: 8px;
+  border-bottom: 2px solid #333;
+  border-radius: 0 0 50% 50%;
+}
+
+/* Whiskers */
+.cat-whiskers {
+  display: flex;
+  justify-content: space-between;
+  width: 110px;
+  margin-top: 2px;
+}
+
+.cat-whisker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cat-whisker {
+  width: 28px;
+  height: 1px;
+  background: #888;
+}
+
+.cat-whisker-group:first-child .cat-whisker {
+  transform-origin: right center;
+}
+
+.cat-whisker-group:first-child .cat-whisker:first-child { transform: rotate(-10deg); }
+.cat-whisker-group:first-child .cat-whisker:last-child { transform: rotate(10deg); }
+
+.cat-whisker-group:last-child .cat-whisker {
+  transform-origin: left center;
+}
+
+.cat-whisker-group:last-child .cat-whisker:first-child { transform: rotate(10deg); }
+.cat-whisker-group:last-child .cat-whisker:last-child { transform: rotate(-10deg); }
+
+/* Body */
+.cat-body {
+  width: 100px;
+  height: 70px;
+  background: #555;
+  border-radius: 30% 30% 50% 50%;
+  margin-top: -10px;
+  position: relative;
+  z-index: 0;
+}
+
+/* Paws */
+.cat-paws {
+  display: flex;
+  gap: 40px;
+  margin-top: -8px;
+  z-index: 1;
+}
+
+.cat-paw {
+  width: 24px;
+  height: 16px;
+  background: #555;
+  border-radius: 50%;
+  transition: transform 0.1s ease;
+}
+
+/* Tail */
+.cat-tail {
+  width: 60px;
+  height: 30px;
+  border: 4px solid #555;
+  border-color: transparent transparent #555 transparent;
+  border-radius: 0 0 50% 50%;
+  position: absolute;
+  bottom: 30px;
+  right: 15px;
+  transform: rotate(-20deg);
+  transition: transform 0.3s ease;
+}
+
+/* ===== State Animations ===== */
+
+/* Idle - gentle breathing */
+.cat-container.state-idle .cat-body {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.cat-container.state-idle .cat-tail {
+  animation: tailWag 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.04); }
+}
+
+@keyframes tailWag {
+  0%, 100% { transform: rotate(-20deg); }
+  50% { transform: rotate(-35deg); }
+}
+
+/* Typing - paws move */
+.cat-container.state-typing .cat-paw:first-child {
+  animation: pawLeft 0.3s ease-in-out infinite;
+}
+
+.cat-container.state-typing .cat-paw:last-child {
+  animation: pawRight 0.3s ease-in-out infinite 0.15s;
+}
+
+.cat-container.state-typing .cat-pupil {
+  transform: translateY(3px);
+}
+
+@keyframes pawLeft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pawRight {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Clicking - one paw taps */
+.cat-container.state-clicking .cat-paw:last-child {
+  animation: pawClick 0.4s ease-in-out infinite;
+}
+
+.cat-container.state-clicking .cat-pupil {
+  transform: translateX(3px);
+}
+
+@keyframes pawClick {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.1); }
+}
+
+/* Scrolling - eyes move up and down */
+.cat-container.state-scrolling .cat-pupil {
+  animation: eyeScroll 0.8s ease-in-out infinite;
+}
+
+@keyframes eyeScroll {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(3px); }
+}
+
+/* Sleeping */
+.cat-container.state-sleeping .cat-eye {
+  height: 4px;
+  margin-top: 7px;
+  background: transparent;
+  border-top: 3px solid #333;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.cat-container.state-sleeping .cat-pupil {
+  display: none;
+}
+
+.cat-container.state-sleeping .cat-body {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.cat-zzz {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #aaa;
+  opacity: 0;
+  display: none;
+}
+
+.cat-container.state-sleeping .cat-zzz {
+  display: block;
+  animation: zzz 2s ease-in-out infinite;
+}
+
+@keyframes zzz {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.8); }
+  50% { opacity: 1; transform: translate(10px, -15px) scale(1); }
+  100% { opacity: 0; transform: translate(20px, -30px) scale(1.2); }
+}
+
+/* Speed modifier for activity intensity */
+.cat-container.speed-fast .cat-paw:first-child,
+.cat-container.speed-fast .cat-paw:last-child {
+  animation-duration: 0.15s !important;
+}
