@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   root: resolve(__dirname, 'src/renderer'),
   server: {
-    port: 5175,
+    port: 5180,
     strictPort: true
   }
 })

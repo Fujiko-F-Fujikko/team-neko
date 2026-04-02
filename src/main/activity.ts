@@ -1,4 +1,3 @@
-import { uIOhook, UiohookKeyboardEvent, UiohookMouseEvent, UiohookWheelEvent } from 'uiohook-napi'
 import { CatState } from './types'
 
 export type { CatState }
@@ -11,7 +10,7 @@ const IDLE_TIMEOUT = 30000
 let lastKeyTime = 0
 let lastClickTime = 0
 let lastScrollTime = 0
-let lastAnyInputTime = 0
+let lastAnyInputTime = Date.now()
 let keyPressCount = 0
 let mouseClickCount = 0
 
@@ -51,32 +50,62 @@ export function startActivityMonitor(
 ): void {
   stateChangeCallback = onChange
 
-  uIOhook.on('keydown', (_e: UiohookKeyboardEvent) => {
-    lastKeyTime = Date.now()
-    lastAnyInputTime = lastKeyTime
-    keyPressCount++
-    updateState()
-  })
+  // Try uiohook-napi for global input detection
+  try {
+    const { uIOhook } = require('uiohook-napi')
 
-  uIOhook.on('mousedown', (_e: UiohookMouseEvent) => {
-    lastClickTime = Date.now()
-    lastAnyInputTime = lastClickTime
-    mouseClickCount++
-    updateState()
-  })
+    uIOhook.on('keydown', () => {
+      lastKeyTime = Date.now()
+      lastAnyInputTime = lastKeyTime
+      keyPressCount++
+      updateState()
+    })
 
-  uIOhook.on('wheel', (_e: UiohookWheelEvent) => {
-    lastScrollTime = Date.now()
-    lastAnyInputTime = lastScrollTime
-    updateState()
-  })
+    uIOhook.on('mousedown', () => {
+      lastClickTime = Date.now()
+      lastAnyInputTime = lastClickTime
+      mouseClickCount++
+      updateState()
+    })
+
+    uIOhook.on('wheel', () => {
+      lastScrollTime = Date.now()
+      lastAnyInputTime = lastScrollTime
+      updateState()
+    })
+
+    uIOhook.start()
+    console.log('[Team Neko] uiohook-napi started successfully (global input detection)')
+  } catch (err) {
+    console.warn('[Team Neko] uiohook-napi failed to start, using fallback:', (err as Error).message)
+    console.warn('[Team Neko] Renderer-side input detection will be used instead')
+  }
 
   // Periodically check for idle/sleeping transitions
   setInterval(updateState, 1000)
+}
 
-  uIOhook.start()
+// Called from renderer via IPC when uiohook is not available
+export function reportActivity(type: 'key' | 'click' | 'scroll'): void {
+  const now = Date.now()
+  lastAnyInputTime = now
+  if (type === 'key') {
+    lastKeyTime = now
+    keyPressCount++
+  } else if (type === 'click') {
+    lastClickTime = now
+    mouseClickCount++
+  } else if (type === 'scroll') {
+    lastScrollTime = now
+  }
+  updateState()
 }
 
 export function stopActivityMonitor(): void {
-  uIOhook.stop()
+  try {
+    const { uIOhook } = require('uiohook-napi')
+    uIOhook.stop()
+  } catch {
+    // uiohook was never started
+  }
 }

@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('activity:state-changed', (_event, data) => callback(data))
   },
   getServerAddress: (): Promise<string> => ipcRenderer.invoke('get-server-address'),
+  reportActivity: (type: 'key' | 'click' | 'scroll') => ipcRenderer.send('activity:report', type),
   toggleOverlay: () => ipcRenderer.send('toggle-overlay'),
   onOverlayModeChanged: (callback: (isOverlay: boolean) => void) => {
     ipcRenderer.on('overlay-mode-changed', (_event, isOverlay) => callback(isOverlay))

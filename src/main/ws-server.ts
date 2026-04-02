@@ -36,6 +36,7 @@ export function startWSServer(): Promise<WebSocketServer | null> {
       console.log(`[Team Neko] WebSocket server running on ws://${ip}:${WS_PORT}`)
 
       server.on('connection', (ws) => {
+        console.log(`[Team Neko] clinet connected.`)
         ws.on('message', (data) => {
           const msg = data.toString()
           wss?.clients.forEach((client) => {

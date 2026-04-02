@@ -35,6 +35,9 @@ export default defineConfig({
         }
       }
     },
-    plugins: [react()]
+    plugins: [react()],
+    server: {
+      host: '0.0.0.0'
+    }
   }
 })
