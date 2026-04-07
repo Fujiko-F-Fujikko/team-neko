@@ -15,7 +15,7 @@ function hashColor(name: string): string {
 const DEFAULT_SCALE = 0.35
 const CAT_W = 200
 const CAT_H = 240
-const DEFAULT_SERVER = 'ws://43.22.98.63:9876'
+const DEFAULT_SERVER = 'ws://xx.xx.xx.xx:9876'
 const states: CatState[] = ['idle', 'typing', 'clicking', 'scrolling', 'sleeping']
 
 interface CatPos { x: number; y: number; scale: number }
